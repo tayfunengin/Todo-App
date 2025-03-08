@@ -21,6 +21,7 @@ export interface ITodoItemsClient {
     update(id: number, command: UpdateTodoItemCommand): Observable<FileResponse>;
     delete(id: number): Observable<FileResponse>;
     updateItemDetails(id: number | undefined, command: UpdateTodoItemDetailCommand): Observable<FileResponse>;
+    softDelete(command: SoftDeleteTodoItemCommand): Observable<FileResponse>;
 }
 
 @Injectable({
@@ -304,6 +305,56 @@ export class TodoItemsClient implements ITodoItemsClient {
         }
         return _observableOf(null as any);
     }
+
+    softDelete(command: SoftDeleteTodoItemCommand): Observable<FileResponse> {
+        let url_ = this.baseUrl + "/api/TodoItems/SoftDelete";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processSoftDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processSoftDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<FileResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<FileResponse>;
+        }));
+    }
+
+    protected processSoftDelete(response: HttpResponseBase): Observable<FileResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return _observableOf({ fileName: fileName, data: responseBlob as any, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 export interface ITodoListsClient {
@@ -312,6 +363,7 @@ export interface ITodoListsClient {
     get2(id: number): Observable<FileResponse>;
     update(id: number, command: UpdateTodoListCommand): Observable<FileResponse>;
     delete(id: number): Observable<FileResponse>;
+    softDelete(command: SoftDeleteTodoListCommand): Observable<FileResponse>;
 }
 
 @Injectable({
@@ -560,6 +612,56 @@ export class TodoListsClient implements ITodoListsClient {
     }
 
     protected processDelete(response: HttpResponseBase): Observable<FileResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return _observableOf({ fileName: fileName, data: responseBlob as any, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    softDelete(command: SoftDeleteTodoListCommand): Observable<FileResponse> {
+        let url_ = this.baseUrl + "/api/TodoLists/SoftDelete";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processSoftDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processSoftDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<FileResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<FileResponse>;
+        }));
+    }
+
+    protected processSoftDelete(response: HttpResponseBase): Observable<FileResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -904,6 +1006,42 @@ export enum PriorityLevel {
     High = 3,
 }
 
+export class SoftDeleteTodoItemCommand implements ISoftDeleteTodoItemCommand {
+    id?: number;
+
+    constructor(data?: ISoftDeleteTodoItemCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): SoftDeleteTodoItemCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new SoftDeleteTodoItemCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        return data;
+    }
+}
+
+export interface ISoftDeleteTodoItemCommand {
+    id?: number;
+}
+
 export class TodosVm implements ITodosVm {
     priorityLevels?: PriorityLevelDto[];
     lists?: TodoListDto[];
@@ -1186,6 +1324,42 @@ export class UpdateTodoListCommand implements IUpdateTodoListCommand {
 export interface IUpdateTodoListCommand {
     id?: number;
     title?: string | undefined;
+}
+
+export class SoftDeleteTodoListCommand implements ISoftDeleteTodoListCommand {
+    id?: number;
+
+    constructor(data?: ISoftDeleteTodoListCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): SoftDeleteTodoListCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new SoftDeleteTodoListCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        return data;
+    }
+}
+
+export interface ISoftDeleteTodoListCommand {
+    id?: number;
 }
 
 export class WeatherForecast implements IWeatherForecast {

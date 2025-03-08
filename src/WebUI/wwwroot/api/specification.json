@@ -206,6 +206,39 @@
         }
       }
     },
+    "/api/TodoItems/SoftDelete": {
+      "delete": {
+        "tags": [
+          "TodoItems"
+        ],
+        "operationId": "TodoItems_SoftDelete",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SoftDeleteTodoItemCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/TodoLists": {
       "get": {
         "tags": [
@@ -349,6 +382,39 @@
             "x-position": 1
           }
         ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/TodoLists/SoftDelete": {
+      "delete": {
+        "tags": [
+          "TodoLists"
+        ],
+        "operationId": "TodoLists_SoftDelete",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SoftDeleteTodoListCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
         "responses": {
           "200": {
             "description": "",
@@ -509,6 +575,16 @@
           3
         ]
       },
+      "SoftDeleteTodoItemCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "TodosVm": {
         "type": "object",
         "additionalProperties": false,
@@ -615,6 +691,16 @@
           "title": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "SoftDeleteTodoListCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
