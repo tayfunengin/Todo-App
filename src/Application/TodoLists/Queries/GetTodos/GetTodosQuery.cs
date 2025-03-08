@@ -9,6 +9,7 @@ namespace Todo_App.Application.TodoLists.Queries.GetTodos;
 
 public record GetTodosQuery : IRequest<TodosVm>;
 
+
 public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, TodosVm>
 {
     private readonly IApplicationDbContext _context;
@@ -36,4 +37,8 @@ public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, TodosVm>
                 .ToListAsync(cancellationToken)
         };
     }
+
+
+
+
 }

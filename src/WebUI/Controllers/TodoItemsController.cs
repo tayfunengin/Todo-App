@@ -4,7 +4,10 @@ using Todo_App.Application.TodoItems.Commands.CreateTodoItem;
 using Todo_App.Application.TodoItems.Commands.DeleteTodoItem;
 using Todo_App.Application.TodoItems.Commands.UpdateTodoItem;
 using Todo_App.Application.TodoItems.Commands.UpdateTodoItemDetail;
+using Todo_App.Application.TodoItems.Commands.UpdateTodoItemDetailWithTag;
+using Todo_App.Application.TodoItems.Queries.GetTodoItemsWithFilter;
 using Todo_App.Application.TodoItems.Queries.GetTodoItemsWithPagination;
+using Todo_App.Application.TodoLists.Queries.GetTodos;
 
 namespace Todo_App.WebUI.Controllers;
 
@@ -15,6 +18,13 @@ public class TodoItemsController : ApiControllerBase
     {
         return await Mediator.Send(query);
     }
+
+    [HttpGet("[action]")]
+    public async Task<ActionResult<List<TodoItemDto>>> GetTodoItemsWithFilter([FromQuery] GetTodoItemsWithFilterQuery query)
+    {
+        return await Mediator.Send(query);
+    }
+
 
     [HttpPost]
     public async Task<ActionResult<int>> Create(CreateTodoItemCommand command)
@@ -48,6 +58,19 @@ public class TodoItemsController : ApiControllerBase
         return NoContent();
     }
 
+    [HttpPut("[action]")]
+    public async Task<ActionResult> UpdateItemDetailsWithTags(int id, UpdateTodoItemDetailWithTagCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest();
+        }
+
+        await Mediator.Send(command);
+
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
@@ -55,4 +78,6 @@ public class TodoItemsController : ApiControllerBase
 
         return NoContent();
     }
+
+
 }
