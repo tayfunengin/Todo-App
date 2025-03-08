@@ -36,3 +36,18 @@
 .modal-footer {
   display: block;
 }
+
+.tags {
+  .tags-container {
+    gap: 0.2rem;
+  }
+  span.remove-span {
+    cursor: pointer;
+  }
+}
+
+.todo-items-filter {
+  form {
+    gap: 1rem;
+  }
+}
